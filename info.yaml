@@ -4,10 +4,10 @@ project:
   wokwi_id:    0        # If using wokwi, set this to your project's ID
 # wokwi id: 347889351946928723
   source_files:        # If using an HDL, set wokwi_id as 0 and uncomment and list your source files here. Source files must be in ./src
-    - controller.v
+    - tt2.v
     - pid.v
-    - spi_master.v
-    - spi_slave.v
+    #- spi_master.v
+    #- spi_slave.v
   top_module:  "AidanMedcalf_pid_controller"      # put the name of your top module here, make it unique by prepending your github username
 
 # As everyone will have access to all designs, try to make it easy for someone new to your design to know what
