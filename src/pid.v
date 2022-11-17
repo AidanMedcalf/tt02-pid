@@ -36,21 +36,20 @@ module pid #(
 
     //assign pacc = error * kp;
 	// kp always positive, so sgn(pacc) = sgn(error)
-	assign pacc[2*BITS] = kp == 'b0 ? 'b0 : error[BITS];
+	assign pacc[2*BITS] = error[BITS];
 	Mult_Wallace4 #(.N(BITS)) pmul (.a(error[BITS-1:0]), .b(kp), .o(pacc[2*BITS-1:0]));
 
 	//assign dacc = diff * kd;
+    // TODO: not this
 	// kd always positive, so sgn(dacc) = sgn(diff)
-	assign dacc[2*BITS] = kd == 'b0 ? 'b0 : diff[BITS];
+	assign dacc[2*BITS] = diff[BITS];
 	Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
 
 	assign iacc = error_i * ki;
 	
 	assign accumulator = pacc + dacc + iacc;
     // sat_add #(.BITS(2*BITS)) apadd (.A({2*BITS{1'b0}}), .B(pacc), .O(accumulator));
-    assign stimulus = accumulator[2*BITS] ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
-
-	// strobe #(.BITS(8)) strobe(.reset(reset), .clk(clk), .out(tick));
+    assign stimulus = (reset | accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
 
     always @(posedge clk) begin
         if (reset) begin
@@ -59,26 +58,12 @@ module pid #(
 			error_i <= 'b0;
         end else begin
 			if (pv_stb) begin
-				error <= error_calc;
-				error_p <= error;
+                error_p <= error;
+                error <= error_calc;
 				error_i <= error_i + error;
 			end
         end
     end
-endmodule
-
-module strobe #( parameter BITS=8 ) ( input reset, input clk, output out );
-	reg  [BITS-1:0] count;
-	wire [BITS-1:0] next;
-	assign next = count + 'b1;
-	assign out = next == 0;
-	always @(posedge clk) begin
-		if (reset) begin
-			count <= 'b0;
-		end else begin
-			count <= next;
-		end
-	end
 endmodule
 
 module sat_add #( BITS=4 ) ( input [BITS-1:0] A, input [BITS-1:0] B, output [BITS-1:0] O );

@@ -5,10 +5,10 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 
-VERILOG_SOURCES += $(PWD)/pid_tb.v $(PWD)/pid.v
+VERILOG_SOURCES += $(PWD)/tt2_tb.v $(PWD)/tt2.v $(PWD)/spi_slave.v $(PWD)/pid.v $(PWD)/spi_master_out.v $(PWD)/spi_master_in.v
 
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
-TOPLEVEL = pid_tb
+TOPLEVEL = tt2_tb
 
 # MODULE is the basename of the Python test file
 MODULE = test

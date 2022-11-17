@@ -6,8 +6,9 @@ project:
   source_files:        # If using an HDL, set wokwi_id as 0 and uncomment and list your source files here. Source files must be in ./src
     - tt2.v
     - pid.v
-    #- spi_master.v
-    #- spi_slave.v
+    - spi_master_in.v
+    - spi_master_out.v
+    - spi_slave.v
   top_module:  "AidanMedcalf_pid_controller"      # put the name of your top module here, make it unique by prepending your github username
 
 # As everyone will have access to all designs, try to make it easy for someone new to your design to know what
@@ -18,10 +19,10 @@ project:
 # This info will be automatically collected and used to make a datasheet for the chip.
 documentation: 
   author:       "Aidan Medcalf"      # Your name
-  discord:      ""      # Your discord handle
+  discord:      "Pomme de Terrible#1820"      # Your discord handle
   title:        "TinyPID"      # Project title
   description:  "Tiny PID controller with SPI configuration channel, SPI ADC and DAC driver"      # Short description of what your project does
-  how_it_works: "TinyPID reads from an ADC, calculates error and PID values, and writes to a DAC. All parameters of this process are configurable."      # Longer description of how the project works
+  how_it_works: "TinyPID reads from a shift register, calculates error and PID values, and writes to a shift register. All parameters of this process are configurable."      # Longer description of how the project works
   how_to_test:  ""      # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
   external_hw:  ""      # Describe any external hardware needed
   language:     "Verilog" # other examples include Verilog, Amaranth, VHDL, etc
@@ -34,15 +35,15 @@ documentation:
     - en
     - cfg_clk
     - cfg_mosi
-    - cfg_miso
+    - none
     - cfg_cs
-    - cfg_sync
+    - ctrl_miso
   outputs:
     - ctrl_clk
+    - ctrl_in_cs
+    - ctrl_out_cs
     - ctrl_mosi
-    - ctrl_miso
-    - ctrl_adc_cs
-    - ctrl_dac_cs
+    - none
     - none
     - none
     - none

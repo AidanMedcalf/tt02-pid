@@ -1,166 +1,289 @@
 import cocotb
+from cocotb.handle import Force, Release
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, FallingEdge, Timer, ClockCycles
 
+async def send_bits(clk, miso, b3, b2, b1, b0):
+    await ClockCycles(clk, 4)
+    miso.value = not b3
+    await ClockCycles(clk, 4)
+    miso.value = not b2
+    await ClockCycles(clk, 4)
+    miso.value = not b1
+    await ClockCycles(clk, 4)
+    miso.value = not b0
+
 @cocotb.test()
-async def test_proportional(dut):
+async def test_lets_go(dut):
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
-    dut.kp.value = 15
-    dut.ki.value = 0
-    dut.kd.value = 0
-    dut.sp.value = 10
-    dut.pv.value = 10
-    dut.pv_stb.value = 1 # hold pv_stb at 1 to latch error every clock
-    
-    dut.rst.value = 1
-    await ClockCycles(dut.clk, 4)
-    dut.rst.value = 0
+    dut.en.value = 1
+    dut.sck.value = 1
+    dut.mosi.value = 1
+    dut.cs.value = 1
+    dut.io_in5.value = 0
+    dut.ctrl_miso.value = 0
 
-    dut.kp.value = 15
-    dut.sp.value = 10
-    dut.pv.value = 10
-    dut.pv_stb.value = 1
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 6)
+    dut.reset.value = 0
+
+    # wait until it asks for input
+    await FallingEdge(dut.tt2.ctrl_in_cs)
     await ClockCycles(dut.clk, 1)
-    assert int(dut.out.value) == 0
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 0)
 
-    dut.kp.value = 15
-    dut.sp.value = 10
-    dut.pv.value = 0
-    await ClockCycles(dut.clk, 2)
-    #dut._log.info(f"accum   = {dut.pid.accumulator.value}")
-    #dut._log.info(f"error   = {dut.pid.error.value}")
-    #dut._log.info(f"error_p = {dut.pid.error_p.value}")
-    #dut._log.info(f"sp      = {dut.pid.sp.value}")
-    #dut._log.info(f"pv      = {dut.pid.pv.value}")
-    assert int(dut.out.value) == int(150 / 16)
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await ClockCycles(dut.clk, 1)
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 0)
 
-    dut.kp.value = 15
-    dut.sp.value = 0
-    dut.pv.value = 10
-    await ClockCycles(dut.clk, 2)
-    #dut._log.info(f"accum   = {dut.pid.accumulator.value}")
-    #dut._log.info(f"error   = {dut.pid.error.value}")
-    #dut._log.info(f"error_p = {dut.pid.error_p.value}")
-    #dut._log.info(f"sp      = {dut.pid.sp.value}")
-    #dut._log.info(f"pv      = {dut.pid.pv.value}")
-    assert int(dut.out.value) == 0
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await ClockCycles(dut.clk, 1)
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 1)
 
-    dut.kp.value = 0
-    await ClockCycles(dut.clk, 2)
-    assert int(dut.out.value) == 0
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await ClockCycles(dut.clk, 1)
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 1)
 
-    dut.kp.value = 15
-    dut.sp.value = 15
-    dut.pv.value = 0
-    await ClockCycles(dut.clk, 2)
-    assert int(dut.out.value) == 14
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    #await ClockCycles(dut.clk, 2)
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 1, 0, 0)
+
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    #await ClockCycles(dut.clk, 2)
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 1, 0, 0)
+
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    #await ClockCycles(dut.clk, 2)
+    await send_bits(dut.clk, dut.ctrl_miso, 0, 1, 0, 1)
+
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    #await ClockCycles(dut.clk, 2)
+    await send_bits(dut.clk, dut.ctrl_miso, 1, 0, 0, 0)
+
+    await FallingEdge(dut.tt2.ctrl_in_cs)
+    #await ClockCycles(dut.clk, 2)
+    await send_bits(dut.clk, dut.ctrl_miso, 1, 0, 1, 0)
+
+    await ClockCycles(dut.clk, 30)
 
 @cocotb.test()
-async def test_differential(dut):
+async def test_spi_master_in(dut):
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
-    # basic settings
-    dut.kp.value = 0
-    dut.ki.value = 0
-    dut.kd.value = 15
-    dut.sp.value = 10
-    dut.pv.value = 0
-    dut.pv_stb.value = 0
+    dut.en.value = 0
+    dut.sck.value = 1
+    dut.mosi.value = 1
+    dut.cs.value = 1
+    dut.io_in5.value = 0
+    dut.ctrl_miso.value = 0
 
-    dut.rst.value = 1
-    await ClockCycles(dut.clk, 4)
-    dut.rst.value = 0
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 6)
+    dut.reset.value = 0
 
-    assert int(dut.pid.error.value) == 10
-    assert int(dut.pid.error_p.value) == 10
-    assert int(dut.out.value) == 0
-
-    dut.pv_stb.value = 0
+    dut.tt2.spi_in.miso.value = Force(0)
     await ClockCycles(dut.clk, 1)
-    dut.pv_stb.value = 1
+
+    dut.tt2.spi_in.start.value = Force(1)
     await ClockCycles(dut.clk, 1)
-    assert int(dut.pid.error.value) == 10
-    assert int(dut.pid.error_p.value) == 10
-    assert int(dut.out.value) == 0
+    dut.tt2.spi_in.start.value = Force(0)
+    await ClockCycles(dut.clk, 14)
+    dut.tt2.spi_in.miso.value = Force(1)
+    await ClockCycles(dut.clk, 15)
 
-    dut.sp.value = 12
-    await ClockCycles(dut.clk, 2)
-    # error should be 12, error_p should be 10, out should be 30/16 = 1
-    assert int(dut.pid.error.value) == 12
-    assert int(dut.pid.error_p.value) == 10
-    assert int(dut.out.value) == int(30/16)
-
-    dut.pv.value = 4
-    await ClockCycles(dut.clk, 2)
-    # error should be 8, error_p should be 12, out should be 0
-    assert int(dut.pid.error.value) == 8
-    assert int(dut.pid.error_p.value) == 12
-    assert int(dut.out.value) == 0
+    dut.tt2.spi_in.miso.value = Release()
+    dut.tt2.spi_in.start.value = Release()
 
 @cocotb.test()
-async def test_integral(dut):
+async def test_spi_master_out(dut):
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
-    # basic settings
-    dut.kp.value = 0
-    dut.ki.value = 10
-    dut.kd.value = 0
-    dut.sp.value = 10
-    dut.pv.value = 8
-    dut.pv_stb.value = 0
+    dut.en.value = 0
+    dut.sck.value = 1
+    dut.mosi.value = 1
+    dut.cs.value = 1
+    dut.io_in5.value = 0
+    dut.ctrl_miso.value = 0
 
-    dut.rst.value = 1
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 10)
+    dut.reset.value = 0
+
+    dut.tt2.spi_out.in_buf.value = Force(5)
+    dut.tt2.pid_stb.value = Force(0)
+
+    await ClockCycles(dut.clk, 2)
+
+    dut.tt2.pid_stb.value = Force(1)
+    await ClockCycles(dut.clk, 1)
+    #assert int(dut.tt2.cfg_cs) == 0
+    await ClockCycles(dut.clk, 1)
+    dut.tt2.pid_stb.value = Force(0)
+    #assert int(dut.tt2.cfg_sck) == 1
+    await ClockCycles(dut.clk, 1)
+    #assert int(dut.tt2.cfg_sck) == 0
+    #assert int(dut.tt2.cfg_mosi) == 1
+    await ClockCycles(dut.clk, 30)
+
+    dut.tt2.spi_out.in_buf.value = Release()
+    dut.tt2.pid_stb.value = Release()
+
+async def shift_bits(clk, sck, mosi, bits):
+    for b in range(8):
+        mosi.value = bits[b]
+        #await ClockCycles(clk, 1)
+        sck.value = 0
+        await ClockCycles(clk, 1)
+        sck.value = 1
+        await ClockCycles(clk, 1)
+
+@cocotb.test()
+async def test_spi_in(dut):
+    clock = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clock.start())
+
+    dut.en.value = 0
+    dut.sck.value = 1
+    dut.mosi.value = 1
+    dut.cs.value = 1
+    dut.io_in5.value = 0
+    dut.ctrl_miso.value = 0
+
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 10)
+    dut.reset.value = 0
+
+    # shift in bad data while cs
+    # cfg_buf is set to zero on reset
+    # SPI signals are inverted (like usual)
+    dut.cs.value = 1
+    for w in range(4):
+        await shift_bits(dut.clk, dut.sck, dut.mosi, [0,1,1,0,1,0,0,1])
+        #for b in range(8):
+            #dut.mosi.value = 0
+            #dut.sck.value = 0
+            #await ClockCycles(dut.clk, 1)
+            #dut.sck.value = 1
+            #await ClockCycles(dut.clk, 1)
+    dut.cs.value = 1
+    await ClockCycles(dut.clk, 2)
+
+    # Reset values
+    assert int(dut.tt2.cfg_buf[0]) == 0x4A
+    assert int(dut.tt2.cfg_buf[1]) == 0x23
+    assert int(dut.tt2.cfg_buf[2]) == 0xFF
+    assert int(dut.tt2.cfg_buf[3]) == 0x00
+
+    # Shift in some bits
+    dut.cs.value = 0
+    dut.sck.value = 1
+    await ClockCycles(dut.clk, 1)
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [1,1,1,1,1,1,1,0])
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [1,1,1,1,1,1,0,1])
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [1,1,1,1,1,1,0,0])
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [1,1,1,1,1,0,1,1])
+    dut.cs.value = 1
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.cfg_buf[0].value) == 1
+    assert int(dut.tt2.cfg_buf[1].value) == 2
+    assert int(dut.tt2.cfg_buf[2].value) == 3
+    assert int(dut.tt2.cfg_buf[3].value) == 4
+
+    # Shift in some bits
+    dut.cs.value = 0
+    dut.sck.value = 1
+    await ClockCycles(dut.clk, 1)
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [0,0,0,0,0,0,0,0])
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [1,1,1,1,1,1,1,1])
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [0,0,0,0,0,0,0,0])
+    await shift_bits(dut.clk, dut.sck, dut.mosi, [1,1,1,1,1,1,1,1])
+    dut.cs.value = 1
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.cfg_buf[0].value) == 0xFF
+    assert int(dut.tt2.cfg_buf[1].value) == 0
+    assert int(dut.tt2.cfg_buf[2].value) == 0xFF
+    assert int(dut.tt2.cfg_buf[3].value) == 0
+
+@cocotb.test()
+async def test_edge_det(dut):
+    clock = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clock.start())
+
+    dut.en.value = 0
+    dut.sck.value = 1
+    dut.mosi.value = 1
+    dut.cs.value = 1
+    dut.io_in5.value = 0
+    dut.ctrl_miso.value = 0
+
+    dut.tt2.ctrl_in_cs_pe.out.value = Release()
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 6)
+    dut.reset.value = 0
+
+    # test positive edge
+    dut.tt2.ctrl_in_cs_pe.sig.value = Force(0)
     await ClockCycles(dut.clk, 4)
-    dut.rst.value = 0
+    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 0
+    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 0
+    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
+    dut.tt2.ctrl_in_cs_pe.sig.value = Force(1)
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 0
+    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 0
+    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 0
+    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 1
+    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 1
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 1
+    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 1
+    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 1
+    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 1
+    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
 
-    assert int(dut.pid.error.value) == 2
-    assert int(dut.pid.error_p.value) == 2
-    assert int(dut.pid.error_i.value) == 0
-    assert int(dut.out.value) == 0
+    dut.tt2.ctrl_in_cs_pe.sig.value = Release()
+    dut.tt2.ctrl_in_cs_pe.out.value = Release()
 
-    dut.pv_stb.value = 1
-    await ClockCycles(dut.clk, 2);
-    # error is 2, expect error_i = 2
-    assert int(dut.pid.error.value) == 2
-    assert int(dut.pid.error_i.value) == 2
-    assert int(dut.out.value) == int(20/16)
+    await ClockCycles(dut.clk, 5)
 
-    dut.sp.value = 6; # prepare for next cycle
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 2
-    assert int(dut.pid.error_i.value) == 4
-    assert int(dut.out.value) == int(40/16)
+    dut.tt2.cfg_spi_busy_ne.out.value = Release()
+    dut.tt2.cfg_spi_busy_ne.sig.value = Force(1)
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 6)
+    dut.reset.value = 0
 
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 0b11110
-    assert int(dut.pid.error_i.value) == 6
-    assert int(dut.out.value) == int(60/16)
+    # test negative edge
+    dut.tt2.cfg_spi_busy_ne.sig.value = Force(1)
+    await ClockCycles(dut.clk, 4)
+    assert int(dut.tt2.cfg_spi_busy_ne.siglast.value) == 1
+    assert int(dut.tt2.cfg_spi_busy_ne.sigin.value) == 1
+    assert int(dut.tt2.cfg_spi_busy_ne.out.value) == 0
+    dut.tt2.cfg_spi_busy_ne.sig.value = Force(0)
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.cfg_spi_busy_ne.siglast.value) == 1
+    assert int(dut.tt2.cfg_spi_busy_ne.sigin.value) == 1
+    assert int(dut.tt2.cfg_spi_busy_ne.out.value) == 0
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.cfg_spi_busy_ne.siglast.value) == 1
+    assert int(dut.tt2.cfg_spi_busy_ne.sigin.value) == 0
+    assert int(dut.tt2.cfg_spi_busy_ne.out.value) == 1
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.cfg_spi_busy_ne.siglast.value) == 0
+    assert int(dut.tt2.cfg_spi_busy_ne.sigin.value) == 0
+    assert int(dut.tt2.cfg_spi_busy_ne.out.value) == 0
+    await ClockCycles(dut.clk, 1)
+    assert int(dut.tt2.cfg_spi_busy_ne.siglast.value) == 0
+    assert int(dut.tt2.cfg_spi_busy_ne.sigin.value) == 0
+    assert int(dut.tt2.cfg_spi_busy_ne.out.value) == 0
 
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 0b11110
-    assert int(dut.pid.error_i.value) == 4
-    assert int(dut.out.value) == int(40/16)
+    dut.tt2.cfg_spi_busy_ne.sig.value = Release()
+    dut.tt2.cfg_spi_busy_ne.out.value = Release()
 
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 0b11110
-    assert int(dut.pid.error_i.value) == 2
-    assert int(dut.out.value) == int(20/16)
-
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 0b11110
-    assert int(dut.pid.error_i.value) == 0
-    assert int(dut.out.value) == 0
-
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 0b11110
-    assert int(dut.pid.error_i.value) == 0b11110
-    assert int(dut.out.value) == 0
-
-    await ClockCycles(dut.clk, 1);
-    assert int(dut.pid.error.value) == 0b11110
-    assert int(dut.pid.error_i.value) == 0b11100
-    assert int(dut.out.value) == 0
