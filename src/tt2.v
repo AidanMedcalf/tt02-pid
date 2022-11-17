@@ -49,12 +49,13 @@ module AidanMedcalf_pid_controller (
     wire [3:0] kp;
     wire [3:0] ki;
     wire [3:0] kd;
-    wire [7:0] stb_level;
+    wire [15:0] stb_level;
     assign sp = cfg_buf[0][3:0];
     assign kp = cfg_buf[0][7:4];
     assign ki = cfg_buf[1][3:0];
     assign kd = cfg_buf[1][7:4];
-    assign stb_level = cfg_buf[2];
+    assign stb_level[7:0] = cfg_buf[2];
+    assign stb_level[15:8] = cfg_buf[3];
 
     wire pv_stb;
     wire pid_stb;
@@ -91,7 +92,7 @@ module AidanMedcalf_pid_controller (
              .kp(kp), .ki(ki), .kd(kd),
              .stimulus(out));
     
-    strobe pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
+    strobe #(.BITS(16)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
     edge_detect ctrl_in_cs_pe(.reset(reset), .clk(clk), .sig(ctrl_in_cs), .pol(1'b1), .out(pid_stb));
 
@@ -102,8 +103,8 @@ module AidanMedcalf_pid_controller (
         if (reset) begin
             cfg_buf[0] <= 8'h4A;
             cfg_buf[1] <= 8'h23;
-            cfg_buf[2] <= 8'hFF;
-            cfg_buf[3] <= 'b0;
+            cfg_buf[2] <= 8'h00;
+            cfg_buf[3] <= 8'h10;
             pid_stb_d1 <= 'b0;
         end else begin
             pid_stb_d1 <= pid_stb;
