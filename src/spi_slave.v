@@ -40,7 +40,7 @@ module spi_slave_in #(
 
     always @(posedge clk) begin
         if (reset) begin
-            buffer <= 'h4A230010;
+            buffer <= 'b0;
         end
 		if (reset || cs) begin
             //last_busy <= 'b0;
