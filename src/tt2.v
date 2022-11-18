@@ -49,7 +49,7 @@ module AidanMedcalf_pid_controller (
     wire [3:0] kp;
     wire [3:0] ki;
     wire [3:0] kd;
-    wire [15:0] stb_level;
+    wire [11:0] stb_level;
 
     //assign sp = cfg_buf[0][3:0];
     //assign kp = cfg_buf[0][7:4];
@@ -62,7 +62,7 @@ module AidanMedcalf_pid_controller (
     assign kp = cfg_spi_buffer[7:4];
     assign ki = cfg_spi_buffer[11:8];
     assign kd = cfg_spi_buffer[15:12];
-    assign stb_level[15:0] = cfg_spi_buffer[31:16];
+    assign stb_level = cfg_spi_buffer[27:16];
 
     wire pv_stb;
     wire pid_stb;
