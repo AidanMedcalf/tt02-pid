@@ -15,7 +15,7 @@ module spi_slave_in #(
 	input                 cs,
 	input                 sck,
 	input                 mosi,
-    output                done,
+    //output                done,
 	output [BITS-1:0] out_buf
 );
 
@@ -31,23 +31,28 @@ module spi_slave_in #(
     assign out_buf = buffer;
 
     reg busy;
-    reg last_busy;
-    assign done = !busy && last_busy;
+    //reg last_busy;
+    //assign done = !busy && last_busy;
 	wire bit_out;
     assign bit_out = reset ? 1'b0 : !mosi;
 
     reg sck_last;
 
     always @(posedge clk) begin
-        if (reset)
+        if (reset) begin
             buffer <= 'b0;
+            buffer[0] <= 8'h4A;
+            buffer[1] <= 8'h23;
+            buffer[2] <= 8'h00;
+            buffer[3] <= 8'h10;
+        end
 		if (reset || cs) begin
-            last_busy <= 'b0;
+            //last_busy <= 'b0;
 			busy <= 'b0;
 			bi <= 'b0;
             sck_last <= 'b0;
         end else begin
-            last_busy <= busy;
+            //last_busy <= busy;
             sck_last <= sck;
             if (!sck && sck_last) begin // falling edge of SCK
                 buffer <= { buffer[BITS-2:0], bit_out };

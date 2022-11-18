@@ -44,18 +44,25 @@ module AidanMedcalf_pid_controller (
     assign io_out[7] = 1'b0;
 
     // Configuration registers
-    reg  [7:0] cfg_buf[4];
+    //reg  [7:0] cfg_buf[4];
     wire [3:0] sp;
     wire [3:0] kp;
     wire [3:0] ki;
     wire [3:0] kd;
     wire [15:0] stb_level;
-    assign sp = cfg_buf[0][3:0];
-    assign kp = cfg_buf[0][7:4];
-    assign ki = cfg_buf[1][3:0];
-    assign kd = cfg_buf[1][7:4];
-    assign stb_level[7:0] = cfg_buf[2];
-    assign stb_level[15:8] = cfg_buf[3];
+
+    //assign sp = cfg_buf[0][3:0];
+    //assign kp = cfg_buf[0][7:4];
+    //assign ki = cfg_buf[1][3:0];
+    //assign kd = cfg_buf[1][7:4];
+    //assign stb_level[7:0] = cfg_buf[2];
+    //assign stb_level[15:8] = cfg_buf[3];
+
+    assign sp = cfg_spi_buffer[3:0];
+    assign kp = cfg_spi_buffer[7:4];
+    assign ki = cfg_spi_buffer[11:8];
+    assign kd = cfg_spi_buffer[15:12];
+    assign stb_level[15:0] = cfg_spi_buffer[31:16];
 
     wire pv_stb;
     wire pid_stb;
@@ -71,10 +78,9 @@ module AidanMedcalf_pid_controller (
     reg ctrl_in_cs_last;
 
     // Slave SPI for configuration
-    wire cfg_spi_done;
+    //wire cfg_spi_done;
     wire [31:0] cfg_spi_buffer;
-    spi_slave_in cfg_spi(.reset(reset), .clk(clk), .cs(cfg_cs), .sck(cfg_clk), .mosi(cfg_mosi),
-                         .done(cfg_spi_done), .out_buf(cfg_spi_buffer));
+    spi_slave_in cfg_spi(.reset(reset), .clk(clk), .cs(cfg_cs), .sck(cfg_clk), .mosi(cfg_mosi), .out_buf(cfg_spi_buffer));
 
     // Shift input in
     spi_master_in spi_in(.reset(reset), .clk(clk),
@@ -99,21 +105,21 @@ module AidanMedcalf_pid_controller (
 
     always @(posedge clk) begin
         if (reset) begin
-            cfg_buf[0] <= 8'h4A;
-            cfg_buf[1] <= 8'h23;
-            cfg_buf[2] <= 8'h00;
-            cfg_buf[3] <= 8'h10;
+            //cfg_buf[0] <= 8'h4A;
+            //cfg_buf[1] <= 8'h23;
+            //cfg_buf[2] <= 8'h00;
+            //cfg_buf[3] <= 8'h10;
             pid_stb_d1 <= 'b0;
             ctrl_in_cs_last <= 'b0;
         end else begin
             ctrl_in_cs_last <= ctrl_in_cs;
             pid_stb_d1 <= pid_stb;
-            if (cfg_spi_done) begin
-                cfg_buf[3] <= cfg_spi_buffer[7:0];
-                cfg_buf[2] <= cfg_spi_buffer[15:8];
-                cfg_buf[1] <= cfg_spi_buffer[23:16];
-                cfg_buf[0] <= cfg_spi_buffer[31:24];
-            end
+            //if (cfg_spi_done) begin
+                //cfg_buf[3] <= cfg_spi_buffer[7:0];
+                //cfg_buf[2] <= cfg_spi_buffer[15:8];
+                //cfg_buf[1] <= cfg_spi_buffer[23:16];
+                //cfg_buf[0] <= cfg_spi_buffer[31:24];
+            //end
         end
     end
 
