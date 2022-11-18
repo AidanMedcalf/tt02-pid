@@ -66,14 +66,14 @@ module pid #(
     end
 endmodule
 
-module sat_add #( BITS=4 ) ( input [BITS-1:0] A, input [BITS-1:0] B, output [BITS-1:0] O );
+module sat_add #( parameter BITS=4 ) ( input [BITS-1:0] A, input [BITS-1:0] B, output [BITS-1:0] O );
     wire [BITS-1:0] sum;
     wire carry;
     assign { carry, sum } = A + B;
     assign O = carry ? ~0 : sum;
 endmodule
 
-module sat_sub #( BITS=4 ) ( input [BITS-1:0] A, input [BITS-1:0] B, output [BITS-1:0] O );
+module sat_sub #( parameter BITS=4 ) ( input [BITS-1:0] A, input [BITS-1:0] B, output [BITS-1:0] O );
     assign O = A > B ? A - B : '0;
 endmodule
 
