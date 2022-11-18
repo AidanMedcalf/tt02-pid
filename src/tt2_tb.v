@@ -27,12 +27,12 @@ module tt2_tb (
    );
 
     // this part dumps the trace to a vcd file that can be viewed with GTKWave
-    integer i;
+    //integer i;
     initial begin
         $dumpfile ("tt2_tb.vcd");
         $dumpvars (0, tt2_tb);
-        for (i = 0; i < 4; i = i + 1)
-            $dumpvars(1, tt2.cfg_buf[i]);
+        //for (i = 0; i < 4; i = i + 1)
+            //$dumpvars(1, tt2.cfg_buf[i]);
         #1;
     end
 

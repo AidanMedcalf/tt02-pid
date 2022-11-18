@@ -172,14 +172,11 @@ async def test_spi_in(dut):
     dut.cs.value = 1
 
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.cfg_spi_buffer.value) == 0x00000000
+    assert int(dut.tt2.cfg_spi_buffer.value) == 0x4A230010
     await ClockCycles(dut.clk, 1)
 
     # Reset values
-    assert int(dut.tt2.cfg_buf[0]) == 0x4A
-    assert int(dut.tt2.cfg_buf[1]) == 0x23
-    assert int(dut.tt2.cfg_buf[2]) == 0x00
-    assert int(dut.tt2.cfg_buf[3]) == 0x10
+    assert int(dut.tt2.cfg_spi_buffer.value) == 0x4A230010
 
     # Shift in some bits
     dut.cs.value = 0
@@ -193,10 +190,7 @@ async def test_spi_in(dut):
     await ClockCycles(dut.clk, 1)
     assert int(dut.tt2.cfg_spi_buffer.value) == 0x01020304
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.cfg_buf[0].value) == 1
-    assert int(dut.tt2.cfg_buf[1].value) == 2
-    assert int(dut.tt2.cfg_buf[2].value) == 3
-    assert int(dut.tt2.cfg_buf[3].value) == 4
+    assert int(dut.tt2.cfg_spi_buffer.value) == 0x01020304
 
     # Shift in some bits
     dut.cs.value = 0
@@ -210,10 +204,7 @@ async def test_spi_in(dut):
     await ClockCycles(dut.clk, 1)
     assert int(dut.tt2.cfg_spi_buffer.value) == 0xFF00FF00
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.cfg_buf[0].value) == 0xFF
-    assert int(dut.tt2.cfg_buf[1].value) == 0
-    assert int(dut.tt2.cfg_buf[2].value) == 0xFF
-    assert int(dut.tt2.cfg_buf[3].value) == 0
+    assert int(dut.tt2.cfg_spi_buffer.value) == 0xFF00FF00
 
 """
 @cocotb.test()
