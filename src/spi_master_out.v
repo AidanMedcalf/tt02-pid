@@ -13,7 +13,6 @@ module spi_master_out #(
 	input                 reset,
 	input                 clk,
 	input      [BITS-1:0] in_buf,
-    input           [7:0] stb_level,
     input                 start,
 	output reg            sck,
 	output reg            cs,
@@ -35,7 +34,7 @@ module spi_master_out #(
     wire stb_reset;
     assign stb_reset = reset || cs;
     wire sck_stb;
-    strobe stb (.reset(stb_reset), .clk(clk), .level(stb_level), .out(sck_stb));
+    strobe #(.BITS(2)) stb (.reset(stb_reset), .clk(clk), .level(2'd2), .out(sck_stb));
 
     always @(posedge clk) begin
         if (reset) begin

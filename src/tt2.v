@@ -77,13 +77,13 @@ module AidanMedcalf_pid_controller (
                          .done(cfg_spi_done), .out_buf(cfg_spi_buffer));
 
     // Shift input in
-    spi_master_in spi_in(.reset(reset), .clk(clk), .stb_level(8'd2),
+    spi_master_in spi_in(.reset(reset), .clk(clk),
                            .miso(ctrl_miso), .start(pv_stb),
                            .out_buf(in_pv), .sck(ctrl_in_clk), .cs(ctrl_in_cs));
 
     // Shift output out
     spi_master_out spi_out(.reset(reset), .clk(clk), .in_buf(out),
-                           .stb_level(8'd2), .start(pid_stb_d1),
+                           .start(pid_stb_d1),
                            .sck(ctrl_out_clk), .cs(ctrl_out_cs), .mosi(ctrl_mosi));
 
     // PID core
@@ -92,7 +92,7 @@ module AidanMedcalf_pid_controller (
              .kp(kp), .ki(ki), .kd(kd),
              .stimulus(out));
     
-    strobe #(.BITS(16)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
+    strobe #(.BITS(12)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
     assign pid_stb = ctrl_in_cs && !ctrl_in_cs_last;
     //edge_detect ctrl_in_cs_pe(.reset(reset), .clk(clk), .sig(ctrl_in_cs), .pol(1'b1), .out(pid_stb));
