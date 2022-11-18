@@ -34,30 +34,24 @@ module spi_slave_in #(
     assign busy = int_busy;
 	wire bit_out;
     assign bit_out = reset ? 1'b0 : !mosi;
-	//assign buffer[wi][bi] = bit_out;
 
-    integer i;
-	always @(posedge clk) begin
+    reg sck_last;
+
+    always @(posedge clk) begin
+        if (reset)
+            buffer <= 'b0;
 		if (reset || cs) begin
 			int_busy <= 'b0;
 			bi <= 'b0;
-            buffer <= 'b0;
-		end
-	end
-
-	always @(negedge sck) begin
-		if (!cs) begin
-			//buffer[wi][bi] <= reset ? 1'b0 : bit_out;
-            // Shift bit into output buffer
-            buffer <= { buffer[BITS-2:0], bit_out };
-            // Update indices
-			bi <= bi_next;
-            if (int_busy && bi_next == 'b0) begin
-				int_busy <= 'b0;
-            end else begin
-			    int_busy <= 'b1;
+            sck_last <= 'b0;
+        end else begin
+            sck_last <= sck;
+            if (!sck && sck_last) begin // falling edge of SCK
+                buffer <= { buffer[BITS-2:0], bit_out };
+                bi <= bi_next;
+                int_busy <= !int_busy || bi_next != 'b0;
             end
-		end
-	end
+        end
+    end
 
 endmodule
