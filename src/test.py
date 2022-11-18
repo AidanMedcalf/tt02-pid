@@ -215,6 +215,7 @@ async def test_spi_in(dut):
     assert int(dut.tt2.cfg_buf[2].value) == 0xFF
     assert int(dut.tt2.cfg_buf[3].value) == 0
 
+"""
 @cocotb.test()
 async def test_edge_det(dut):
     clock = Clock(dut.clk, 10, units="us")
@@ -293,4 +294,5 @@ async def test_edge_det(dut):
 
     dut.tt2.cfg_spi_busy_ne.sig.value = Release()
     dut.tt2.cfg_spi_busy_ne.out.value = Release()
+"""
 

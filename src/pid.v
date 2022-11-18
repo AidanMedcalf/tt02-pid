@@ -49,7 +49,7 @@ module pid #(
 	
 	assign accumulator = pacc + dacc + iacc;
     // sat_add #(.BITS(2*BITS)) apadd (.A({2*BITS{1'b0}}), .B(pacc), .O(accumulator));
-    assign stimulus = (reset | accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
+    assign stimulus = (reset || accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
 
     always @(posedge clk) begin
         if (reset) begin

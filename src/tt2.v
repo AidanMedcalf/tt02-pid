@@ -68,12 +68,13 @@ module AidanMedcalf_pid_controller (
     wire ctrl_in_clk;
     wire ctrl_out_clk;
     assign ctrl_clk = ctrl_in_clk & ctrl_out_clk;
+    reg ctrl_in_cs_last;
 
     // Slave SPI for configuration
-    wire cfg_spi_busy;
+    wire cfg_spi_done;
     wire [31:0] cfg_spi_buffer;
     spi_slave_in cfg_spi(.reset(reset), .clk(clk), .cs(cfg_cs), .sck(cfg_clk), .mosi(cfg_mosi),
-                         .busy(cfg_spi_busy), .out_buf(cfg_spi_buffer));
+                         .done(cfg_spi_done), .out_buf(cfg_spi_buffer));
 
     // Shift input in
     spi_master_in spi_in(.reset(reset), .clk(clk), .stb_level(8'd2),
@@ -85,8 +86,7 @@ module AidanMedcalf_pid_controller (
                            .stb_level(8'd2), .start(pid_stb_d1),
                            .sck(ctrl_out_clk), .cs(ctrl_out_cs), .mosi(ctrl_mosi));
 
-    // just to see if the PID core fits, fake everything
-    
+    // PID core
     pid pid (.reset(hold), .clk(clk), .pv_stb(pid_stb),
              .sp(sp), .pv(in_pv),
              .kp(kp), .ki(ki), .kd(kd),
@@ -94,10 +94,8 @@ module AidanMedcalf_pid_controller (
     
     strobe #(.BITS(16)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
-    edge_detect ctrl_in_cs_pe(.reset(reset), .clk(clk), .sig(ctrl_in_cs), .pol(1'b1), .out(pid_stb));
-
-    wire cfg_latch_stb;
-    edge_detect cfg_spi_busy_ne(.reset(reset), .clk(clk), .sig(cfg_spi_busy), .pol(1'b0), .out(cfg_latch_stb));
+    assign pid_stb = ctrl_in_cs && !ctrl_in_cs_last;
+    //edge_detect ctrl_in_cs_pe(.reset(reset), .clk(clk), .sig(ctrl_in_cs), .pol(1'b1), .out(pid_stb));
 
     always @(posedge clk) begin
         if (reset) begin
@@ -106,9 +104,11 @@ module AidanMedcalf_pid_controller (
             cfg_buf[2] <= 8'h00;
             cfg_buf[3] <= 8'h10;
             pid_stb_d1 <= 'b0;
+            ctrl_in_cs_last <= 'b0;
         end else begin
+            ctrl_in_cs_last <= ctrl_in_cs;
             pid_stb_d1 <= pid_stb;
-            if (cfg_latch_stb) begin
+            if (cfg_spi_done) begin
                 cfg_buf[3] <= cfg_spi_buffer[7:0];
                 cfg_buf[2] <= cfg_spi_buffer[15:8];
                 cfg_buf[1] <= cfg_spi_buffer[23:16];
@@ -119,6 +119,7 @@ module AidanMedcalf_pid_controller (
 
 endmodule
 
+/*
 module edge_detect (
     input  reset,
     input  clk,
@@ -135,6 +136,7 @@ module edge_detect (
         //siglast <= sigin;
     end
 endmodule
+*/
 
 module strobe #(
     parameter BITS=8
