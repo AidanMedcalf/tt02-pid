@@ -24,15 +24,15 @@ module pid #(
     reg  signed [BITS:0] error;
     reg  signed [BITS:0] error_p;
     reg  signed [BITS:0] error_i;
-	wire signed [BITS:0] diff;
+	//wire signed [BITS:0] diff;
     
     wire signed [2*BITS:0] pacc;
-    wire signed [2*BITS:0] dacc;
+    //wire signed [2*BITS:0] dacc;
     wire signed [2*BITS:0] iacc;
     wire signed [2*BITS:0] accumulator;
 
     assign error_calc = {1'b0,sp} - {1'b0,pv};
-	assign diff = error - error_p;
+	//assign diff = error - error_p;
 
     //assign pacc = error * kp;
 	// kp always positive, so sgn(pacc) = sgn(error)
@@ -42,14 +42,15 @@ module pid #(
 	//assign dacc = diff * kd;
     // TODO: not this
 	// kd always positive, so sgn(dacc) = sgn(diff)
-	assign dacc[2*BITS] = diff[BITS];
-	Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
+	//assign dacc[2*BITS] = diff[BITS];
+	//Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
 
 	//assign iacc = error_i * ki;
     assign iacc[2*BITS] = error_i[BITS];
     Mult_Wallace4 #(.N(BITS)) imul (.a(error_i[BITS-1:0]), .b(ki), .o(iacc[2*BITS-1:0]));
 	
-	assign accumulator = pacc - dacc + iacc;
+	//assign accumulator = pacc - dacc + iacc;
+	assign accumulator = pacc + iacc;
     // sat_add #(.BITS(2*BITS)) apadd (.A({2*BITS{1'b0}}), .B(pacc), .O(accumulator));
     assign stimulus = (reset || accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
 
