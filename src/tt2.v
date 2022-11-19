@@ -13,17 +13,16 @@ module AidanMedcalf_pid_controller (
 
     wire clk;
     wire reset;
-    wire enable;
+    //wire enable;
     wire cfg_clk;
     wire cfg_mosi;
     wire cfg_cs;
     wire pv_in_miso;
-    wire hold;
-    assign hold = reset || !enable;
 
     assign clk        = io_in[0];
     assign reset      = io_in[1];
-    assign enable     = io_in[2];
+    // io_in[2] not used
+    //assign enable     = io_in[2];
     assign cfg_clk    = io_in[3];
     assign cfg_mosi   = io_in[4];
     // io_in[5] not used
@@ -85,7 +84,7 @@ module AidanMedcalf_pid_controller (
                            //.sck(ctrl_out_clk), .cs(ctrl_out_cs), .mosi(ctrl_mosi));
 
     // PID core
-    pid pid (.reset(hold), .clk(clk), .pv_stb(pid_stb),
+    pid pid (.reset(reset), .clk(clk), .pv_stb(pid_stb),
              .sp(sp), .pv(in_pv),
              .kp(kp), .ki(ki), .kd(kd),
              .stimulus(out));

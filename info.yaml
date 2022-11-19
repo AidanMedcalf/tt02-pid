@@ -32,7 +32,7 @@ documentation:
   inputs:               # a description of what the inputs do
     - clock
     - reset
-    - en
+    - none
     - cfg_clk
     - cfg_mosi
     - none

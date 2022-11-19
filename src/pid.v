@@ -22,7 +22,7 @@ module pid #(
 
 	wire signed [BITS:0] error_calc;
     reg  signed [BITS:0] error;
-    reg  signed [BITS:0] error_p;
+    //reg  signed [BITS:0] error_p;
     reg  signed [BITS:0] error_i;
 	//wire signed [BITS:0] diff;
     
@@ -55,14 +55,13 @@ module pid #(
     assign stimulus = (reset || accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
 
     always @(posedge clk) begin
+		error <= error_calc;
         if (reset) begin
-			error <= error_calc;
-			error_p <= error_calc;
+			//error_p <= error_calc;
 			error_i <= 'b0;
         end else begin
 			if (pv_stb) begin
-                error_p <= error;
-                error <= error_calc;
+                //error_p <= error;
 				error_i <= error_i + error;
 			end
         end
