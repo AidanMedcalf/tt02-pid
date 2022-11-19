@@ -45,9 +45,11 @@ module pid #(
 	assign dacc[2*BITS] = diff[BITS];
 	Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
 
-	assign iacc = error_i * ki;
+	//assign iacc = error_i * ki;
+    assign iacc[2*BITS] = error_i[BITS];
+    Mult_Wallace4 #(.N(BITS)) imul (.a(error_i[BITS-1:0]), .b(ki), .o(iacc[2*BITS-1:0]));
 	
-	assign accumulator = pacc + dacc + iacc;
+	assign accumulator = pacc - dacc + iacc;
     // sat_add #(.BITS(2*BITS)) apadd (.A({2*BITS{1'b0}}), .B(pacc), .O(accumulator));
     assign stimulus = (reset || accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
 
