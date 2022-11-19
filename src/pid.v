@@ -36,8 +36,8 @@ module pid #(
 
     //assign pacc = error * kp;
 	// kp always positive, so sgn(pacc) = sgn(error)
-	assign pacc[2*BITS] = error[BITS];
-	Mult_Wallace4 #(.N(BITS)) pmul (.a(error[BITS-1:0]), .b(kp), .o(pacc[2*BITS-1:0]));
+	assign pacc = { error[BITS], error[BITS-1:0] * kp };
+	//Mult_Wallace4 #(.N(BITS)) pmul (.a(error[BITS-1:0]), .b(kp), .o(pacc[2*BITS-1:0]));
 
 	//assign dacc = diff * kd;
     // TODO: not this
@@ -46,8 +46,8 @@ module pid #(
 	//Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
 
 	//assign iacc = error_i * ki;
-    assign iacc[2*BITS] = error_i[BITS];
-    Mult_Wallace4 #(.N(BITS)) imul (.a(error_i[BITS-1:0]), .b(ki), .o(iacc[2*BITS-1:0]));
+	assign iacc = { error_i[BITS], error_i[BITS-1:0] * ki };
+    //Mult_Wallace4 #(.N(BITS)) imul (.a(error_i[BITS-1:0]), .b(ki), .o(iacc[2*BITS-1:0]));
 	
 	//assign accumulator = pacc - dacc + iacc;
 	assign accumulator = pacc + iacc;
