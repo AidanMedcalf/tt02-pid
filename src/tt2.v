@@ -17,31 +17,28 @@ module AidanMedcalf_pid_controller (
     wire cfg_clk;
     wire cfg_mosi;
     wire cfg_cs;
-    wire ctrl_miso;
+    wire pv_in_miso;
     wire hold;
     assign hold = reset || !enable;
 
-    assign clk       = io_in[0];
-    assign reset     = io_in[1];
-    assign enable    = io_in[2];
-    assign cfg_clk   = io_in[3];
-    assign cfg_mosi  = io_in[4];
-    assign cfg_cs    = io_in[6];
-    assign ctrl_miso = io_in[7];
+    assign clk        = io_in[0];
+    assign reset      = io_in[1];
+    assign enable     = io_in[2];
+    assign cfg_clk    = io_in[3];
+    assign cfg_mosi   = io_in[4];
+    // io_in[5] not used
+    assign cfg_cs     = io_in[6];
+    assign pv_in_miso = io_in[7];
 
-    wire ctrl_clk;
-    wire ctrl_in_cs;
-    wire ctrl_out_cs;
-    wire ctrl_mosi;
+    wire pv_in_clk;
+    wire pv_in_cs;
+    reg pv_in_cs_last;
 
-    assign io_out[0] = ctrl_clk;
-    assign io_out[1] = ctrl_in_cs;
-    assign io_out[2] = ctrl_out_cs;
-    assign io_out[3] = ctrl_mosi;
-    assign io_out[4] = 1'b0;
-    assign io_out[5] = 1'b0;
-    assign io_out[6] = 1'b0;
-    assign io_out[7] = 1'b0;
+    assign io_out[0] = pv_in_clk;
+    assign io_out[1] = pv_in_cs;
+    assign io_out[2] = 1'b0; // io_out[2] not used
+    assign io_out[3] = pid_stb_d1;
+    assign io_out[7:4] = out;
 
     // Configuration registers
     //reg  [7:0] cfg_buf[4];
@@ -72,11 +69,6 @@ module AidanMedcalf_pid_controller (
     reg [3:0] in_pv;
     reg [3:0] out;
 
-    wire ctrl_in_clk;
-    wire ctrl_out_clk;
-    assign ctrl_clk = ctrl_in_clk & ctrl_out_clk;
-    reg ctrl_in_cs_last;
-
     // Slave SPI for configuration
     //wire cfg_spi_done;
     wire [31:0] cfg_spi_buffer;
@@ -84,13 +76,13 @@ module AidanMedcalf_pid_controller (
 
     // Shift input in
     spi_master_in spi_in(.reset(reset), .clk(clk),
-                           .miso(ctrl_miso), .start(pv_stb),
-                           .out_buf(in_pv), .sck(ctrl_in_clk), .cs(ctrl_in_cs));
+                           .miso(pv_in_miso), .start(pv_stb),
+                           .out_buf(in_pv), .sck(pv_in_clk), .cs(pv_in_cs));
 
     // Shift output out
-    spi_master_out spi_out(.reset(reset), .clk(clk), .in_buf(out),
-                           .start(pid_stb_d1),
-                           .sck(ctrl_out_clk), .cs(ctrl_out_cs), .mosi(ctrl_mosi));
+    //spi_master_out spi_out(.reset(reset), .clk(clk), .in_buf(out),
+                           //.start(pid_stb_d1),
+                           //.sck(ctrl_out_clk), .cs(ctrl_out_cs), .mosi(ctrl_mosi));
 
     // PID core
     pid pid (.reset(hold), .clk(clk), .pv_stb(pid_stb),
@@ -100,8 +92,8 @@ module AidanMedcalf_pid_controller (
     
     strobe #(.BITS(12)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
-    assign pid_stb = ctrl_in_cs && !ctrl_in_cs_last;
-    //edge_detect ctrl_in_cs_pe(.reset(reset), .clk(clk), .sig(ctrl_in_cs), .pol(1'b1), .out(pid_stb));
+    assign pid_stb = pv_in_cs && !pv_in_cs_last;
+    //edge_detect pv_in_cs_pe(.reset(reset), .clk(clk), .sig(pv_in_cs), .pol(1'b1), .out(pid_stb));
 
     always @(posedge clk) begin
         if (reset) begin
@@ -110,9 +102,9 @@ module AidanMedcalf_pid_controller (
             //cfg_buf[2] <= 8'h00;
             //cfg_buf[3] <= 8'h10;
             pid_stb_d1 <= 'b0;
-            ctrl_in_cs_last <= 'b0;
+            pv_in_cs_last <= 'b0;
         end else begin
-            ctrl_in_cs_last <= ctrl_in_cs;
+            pv_in_cs_last <= pv_in_cs;
             pid_stb_d1 <= pid_stb;
             //if (cfg_spi_done) begin
                 //cfg_buf[3] <= cfg_spi_buffer[7:0];

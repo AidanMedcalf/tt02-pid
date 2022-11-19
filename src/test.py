@@ -29,6 +29,8 @@ async def test_lets_go(dut):
     await ClockCycles(dut.clk, 6)
     dut.reset.value = 0
 
+    dut.tt2.cfg_spi_buffer.value = Force(0x4A230010)
+
     # wait until it asks for input
     await FallingEdge(dut.tt2.ctrl_in_cs)
     await ClockCycles(dut.clk, 1)
@@ -66,7 +68,9 @@ async def test_lets_go(dut):
     #await ClockCycles(dut.clk, 2)
     await send_bits(dut.clk, dut.ctrl_miso, 1, 0, 1, 0)
 
-    await ClockCycles(dut.clk, 30)
+    await ClockCycles(dut.clk, 100)
+
+    dut.tt2.cfg_spi_buffer.value = Release()
 
 @cocotb.test()
 async def test_spi_master_in(dut):
@@ -145,6 +149,8 @@ async def shift_bits(clk, sck, mosi, bits):
 async def test_spi_in(dut):
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
+
+    dut.tt2.cfg_spi_buffer.value = Release()
 
     dut.en.value = 0
     dut.sck.value = 1

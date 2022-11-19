@@ -37,14 +37,14 @@ documentation:
     - cfg_mosi
     - none
     - cfg_cs
-    - ctrl_miso
+    - pv_in_miso
   outputs:
-    - ctrl_clk
-    - ctrl_in_cs
-    - ctrl_out_cs
-    - ctrl_mosi
+    - pv_in_clk
+    - pv_in_cs
     - none
-    - none
-    - none
-    - none
+    - out_latch
+    - out_3
+    - out_2
+    - out_1
+    - out_0
 
