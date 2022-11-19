@@ -31,10 +31,8 @@ module spi_master_in #(
     
     reg phase;
 
-    wire stb_reset;
-    assign stb_reset = reset || cs;
-    wire sck_stb;
-    strobe #(.BITS(2)) stb (.reset(stb_reset), .clk(clk), .level(2'd2), .out(sck_stb));
+    reg [2:0] stb;
+    //strobe #(.BITS(2)) stb (.reset(stb_reset), .clk(clk), .level(2'd2), .out(sck_stb));
 
     always @(posedge clk) begin
         if (reset) begin
@@ -43,9 +41,11 @@ module spi_master_in #(
             cs <= 'b1;
             phase <= 'b0;
             out_buf <= 'b0;
+            stb <= 3'b010;
         end else begin
             if (!cs) begin
-                if (sck_stb) begin
+                stb <= { stb[1:0], stb[2] };
+                if (stb[0]) begin
                     if (phase) begin
                         sck <= 'b1;
                         out_buf <= { out_buf[BITS-2:0], !miso };
@@ -63,6 +63,7 @@ module spi_master_in #(
                 bi <= 'b0;
                 sck <= 'b1;
                 phase <= 'b0;
+                stb <= 3'b010;
                 if (start) begin
                     cs <= 'b0;
                 end
