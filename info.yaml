@@ -41,10 +41,10 @@ documentation:
   outputs:
     - pv_in_clk
     - pv_in_cs
+    - out_clk
+    - out_mosi
+    - out_cs
     - none
-    - out_latch
-    - out_3
-    - out_2
-    - out_1
-    - out_0
+    - none
+    - none
 
