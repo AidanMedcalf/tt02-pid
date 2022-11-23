@@ -23,7 +23,7 @@ async def test_lets_go(dut):
     dut.mosi.value = 1
     dut.cs.value = 1
     dut.io_in5.value = 0
-    dut.ctrl_miso.value = 0
+    dut.pv_in_miso.value = 0
 
     dut.reset.value = 1
     await ClockCycles(dut.clk, 6)
@@ -32,41 +32,41 @@ async def test_lets_go(dut):
     dut.tt2.cfg_spi_buffer.value = Force(0x4A230010)
 
     # wait until it asks for input
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     await ClockCycles(dut.clk, 1)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 0)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 0, 1, 0)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     await ClockCycles(dut.clk, 1)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 0)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 0, 1, 0)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     await ClockCycles(dut.clk, 1)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 1)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 0, 1, 1)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     await ClockCycles(dut.clk, 1)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 0, 1, 1)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 0, 1, 1)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     #await ClockCycles(dut.clk, 2)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 1, 0, 0)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 1, 0, 0)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     #await ClockCycles(dut.clk, 2)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 1, 0, 0)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 1, 0, 0)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     #await ClockCycles(dut.clk, 2)
-    await send_bits(dut.clk, dut.ctrl_miso, 0, 1, 0, 1)
+    await send_bits(dut.clk, dut.pv_in_miso, 0, 1, 0, 1)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     #await ClockCycles(dut.clk, 2)
-    await send_bits(dut.clk, dut.ctrl_miso, 1, 0, 0, 0)
+    await send_bits(dut.clk, dut.pv_in_miso, 1, 0, 0, 0)
 
-    await FallingEdge(dut.tt2.ctrl_in_cs)
+    await FallingEdge(dut.tt2.pv_in_cs)
     #await ClockCycles(dut.clk, 2)
-    await send_bits(dut.clk, dut.ctrl_miso, 1, 0, 1, 0)
+    await send_bits(dut.clk, dut.pv_in_miso, 1, 0, 1, 0)
 
     await ClockCycles(dut.clk, 100)
 
@@ -82,7 +82,7 @@ async def test_spi_master_in(dut):
     dut.mosi.value = 1
     dut.cs.value = 1
     dut.io_in5.value = 0
-    dut.ctrl_miso.value = 0
+    dut.pv_in_miso.value = 0
 
     dut.reset.value = 1
     await ClockCycles(dut.clk, 6)
@@ -111,7 +111,7 @@ async def test_spi_master_out(dut):
     dut.mosi.value = 1
     dut.cs.value = 1
     dut.io_in5.value = 0
-    dut.ctrl_miso.value = 0
+    dut.pv_in_miso.value = 0
 
     dut.reset.value = 1
     await ClockCycles(dut.clk, 10)
@@ -157,7 +157,7 @@ async def test_spi_in(dut):
     dut.mosi.value = 1
     dut.cs.value = 1
     dut.io_in5.value = 0
-    dut.ctrl_miso.value = 0
+    dut.pv_in_miso.value = 0
 
     dut.reset.value = 1
     await ClockCycles(dut.clk, 10)
@@ -223,39 +223,39 @@ async def test_edge_det(dut):
     dut.mosi.value = 1
     dut.cs.value = 1
     dut.io_in5.value = 0
-    dut.ctrl_miso.value = 0
+    dut.pv_in_miso.value = 0
 
-    dut.tt2.ctrl_in_cs_pe.out.value = Release()
+    dut.tt2.pv_in_cs_pe.out.value = Release()
     dut.reset.value = 1
     await ClockCycles(dut.clk, 6)
     dut.reset.value = 0
 
     # test positive edge
-    dut.tt2.ctrl_in_cs_pe.sig.value = Force(0)
+    dut.tt2.pv_in_cs_pe.sig.value = Force(0)
     await ClockCycles(dut.clk, 4)
-    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 0
-    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 0
-    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
-    dut.tt2.ctrl_in_cs_pe.sig.value = Force(1)
+    assert int(dut.tt2.pv_in_cs_pe.siglast.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.sigin.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.out.value) == 0
+    dut.tt2.pv_in_cs_pe.sig.value = Force(1)
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 0
-    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 0
-    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.siglast.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.sigin.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.out.value) == 0
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 0
-    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 1
-    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 1
+    assert int(dut.tt2.pv_in_cs_pe.siglast.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.sigin.value) == 1
+    assert int(dut.tt2.pv_in_cs_pe.out.value) == 1
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 1
-    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 1
-    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.siglast.value) == 1
+    assert int(dut.tt2.pv_in_cs_pe.sigin.value) == 1
+    assert int(dut.tt2.pv_in_cs_pe.out.value) == 0
     await ClockCycles(dut.clk, 1)
-    assert int(dut.tt2.ctrl_in_cs_pe.siglast.value) == 1
-    assert int(dut.tt2.ctrl_in_cs_pe.sigin.value) == 1
-    assert int(dut.tt2.ctrl_in_cs_pe.out.value) == 0
+    assert int(dut.tt2.pv_in_cs_pe.siglast.value) == 1
+    assert int(dut.tt2.pv_in_cs_pe.sigin.value) == 1
+    assert int(dut.tt2.pv_in_cs_pe.out.value) == 0
 
-    dut.tt2.ctrl_in_cs_pe.sig.value = Release()
-    dut.tt2.ctrl_in_cs_pe.out.value = Release()
+    dut.tt2.pv_in_cs_pe.sig.value = Release()
+    dut.tt2.pv_in_cs_pe.out.value = Release()
 
     await ClockCycles(dut.clk, 5)
 

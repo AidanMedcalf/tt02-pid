@@ -15,12 +15,12 @@ module tt2_tb (
 	input mosi,
 	input io_in5,
 	input cs,
-	input ctrl_miso,
-    output ctrl_clk,
-    output ctrl_in_cs,
-    output ctrl_out_cs,
-    output ctrl_mosi,
-    output io_out4,
+	input pv_in_miso,
+    output pv_in_clk,
+    output pv_in_cs,
+    output out_clk,
+    output out_mosi,
+    output out_cs,
     output io_out5,
     output io_out6,
     output io_out7
@@ -39,8 +39,8 @@ module tt2_tb (
 	wire [7:0] io_in;
 	wire [7:0] io_out;
 	//assign io_in = { clk, reset, en, sck, mosi, io_in5, cs, io_in7 };
-	assign io_in = { ctrl_miso, cs, io_in5, mosi, sck, en, reset, clk };
-    assign io_out = { io_out7, io_out6, io_out5, io_out4, ctrl_mosi, ctrl_out_cs, ctrl_in_cs, ctrl_clk };
+	assign io_in = { pv_in_miso, cs, io_in5, mosi, sck, en, reset, clk };
+    assign io_out = { io_out7, io_out6, io_out5, out_cs, out_mosi, out_clk, pv_in_cs, pv_in_clk };
 
     // instantiate the DUT
 	AidanMedcalf_pid_controller tt2(.io_in(io_in), .io_out(io_out));

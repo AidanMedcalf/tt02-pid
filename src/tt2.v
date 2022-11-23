@@ -32,12 +32,17 @@ module AidanMedcalf_pid_controller (
     wire pv_in_clk;
     wire pv_in_cs;
     reg pv_in_cs_last;
+    wire out_clk, out_cs, out_mosi;
 
     assign io_out[0] = pv_in_clk;
     assign io_out[1] = pv_in_cs;
-    assign io_out[2] = 1'b0; // io_out[2] not used
-    assign io_out[3] = pid_stb_d1;
-    assign io_out[7:4] = out;
+    //assign io_out[2] = 1'b0; // io_out[2] not used
+    //assign io_out[3] = pid_stb_d1;
+    //assign io_out[7:4] = out;
+    assign io_out[2] = out_clk;
+    assign io_out[3] = out_mosi;
+    assign io_out[4] = out_cs;
+    assign io_out[7:5] = 1'b0; // not used
 
     // Configuration registers
     //reg  [7:0] cfg_buf[4];
@@ -79,9 +84,9 @@ module AidanMedcalf_pid_controller (
                            .out_buf(in_pv), .sck(pv_in_clk), .cs(pv_in_cs));
 
     // Shift output out
-    //spi_master_out spi_out(.reset(reset), .clk(clk), .in_buf(out),
-                           //.start(pid_stb_d1),
-                           //.sck(ctrl_out_clk), .cs(ctrl_out_cs), .mosi(ctrl_mosi));
+    spi_master_out spi_out(.reset(reset), .clk(clk), .in_buf(out),
+                           .start(pid_stb_d1),
+                           .sck(out_clk), .cs(out_cs), .mosi(out_mosi));
 
     // PID core
     pid pid (.reset(reset), .clk(clk), .pv_stb(pid_stb),
