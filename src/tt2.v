@@ -46,11 +46,11 @@ module AidanMedcalf_pid_controller (
 
     // Configuration registers
     //reg  [7:0] cfg_buf[4];
-    wire [3:0] sp;
-    wire [3:0] kp;
-    wire [3:0] ki;
-    wire [3:0] kd;
-    wire [11:0] stb_level;
+    wire [7:0] sp;
+    wire [7:0] kp;
+    wire [7:0] ki;
+    wire [7:0] kd;
+    wire [15:0] stb_level;
 
     //assign sp = cfg_buf[0][3:0];
     //assign kp = cfg_buf[0][7:4];
@@ -59,24 +59,24 @@ module AidanMedcalf_pid_controller (
     //assign stb_level[7:0] = cfg_buf[2];
     //assign stb_level[15:8] = cfg_buf[3];
 
-    assign sp = cfg_spi_buffer[3:0];
-    assign kp = cfg_spi_buffer[7:4];
-    assign ki = cfg_spi_buffer[11:8];
-    assign kd = cfg_spi_buffer[15:12];
-    assign stb_level = cfg_spi_buffer[27:16];
+    assign sp = cfg_spi_buffer[7:0];
+    assign kp = cfg_spi_buffer[15:8];
+    assign ki = cfg_spi_buffer[23:16];
+    assign kd = cfg_spi_buffer[31:24];
+    assign stb_level = cfg_spi_buffer[47:32];
 
     wire pv_stb;
     wire pid_stb;
     reg pid_stb_d1;
 
     // I/O registers
-    reg [3:0] in_pv;
-    reg [3:0] out;
+    reg [7:0] in_pv;
+    reg [7:0] out;
 
     // Slave SPI for configuration
     //wire cfg_spi_done;
-    wire [31:0] cfg_spi_buffer;
-    spi_slave_in cfg_spi(.reset(reset), .clk(clk), .cs(cfg_cs), .sck(cfg_clk), .mosi(cfg_mosi), .out_buf(cfg_spi_buffer));
+    wire [47:0] cfg_spi_buffer;
+    spi_slave_in #(.BITS(48)) cfg_spi(.reset(reset), .clk(clk), .cs(cfg_cs), .sck(cfg_clk), .mosi(cfg_mosi), .out_buf(cfg_spi_buffer));
 
     // Shift input in
     spi_master_in spi_in(.reset(reset), .clk(clk),
@@ -94,7 +94,7 @@ module AidanMedcalf_pid_controller (
              .kp(kp), .ki(ki), .kd(kd),
              .stimulus(out));
     
-    strobe #(.BITS(12)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
+    strobe #(.BITS(16)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
     assign pid_stb = pv_in_cs && !pv_in_cs_last;
     //edge_detect pv_in_cs_pe(.reset(reset), .clk(clk), .sig(pv_in_cs), .pol(1'b1), .out(pid_stb));

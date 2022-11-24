@@ -7,7 +7,7 @@
 `default_nettype none
 
 module pid #(
-    parameter BITS=4
+    parameter BITS=8
 ) (
     input             reset,
     input             clk,

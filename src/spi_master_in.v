@@ -8,7 +8,7 @@
 
 // SPI master (input only)
 module spi_master_in #(
-	parameter BITS = 4
+	parameter BITS = 8
 ) (
 	input                 reset,
 	input                 clk,
