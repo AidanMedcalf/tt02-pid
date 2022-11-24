@@ -27,7 +27,7 @@ module spi_master_out #(
     localparam BIBITS = $clog2(BITS);
     reg  [BIBITS-1:0] bi;
     wire [BIBITS-1:0] bi_next;
-    assign bi_next = bi + 'b1;
+    assign bi_next = bi - 'b1;
     
     reg phase;
 
@@ -38,12 +38,12 @@ module spi_master_out #(
 
     always @(posedge clk) begin
         if (reset) begin
-            bi <= 'b0;
+            bi <= {BIBITS{1'b1}};
             sck <= 'b1;
             cs <= 'b1;
             mosi <= 'b1;
             phase <= 'b0;
-	    stb <= 3'b010;
+	        stb <= 3'b010;
         end else begin
             if (!cs) begin
                 stb <= { stb[1:0], stb[2] };
@@ -51,18 +51,18 @@ module spi_master_out #(
                     if (phase) begin
                         sck <= 'b1;
                         bi <= bi_next;
-                        if (bi_next == 'b0) begin
+                        if (bi_next == {BIBITS{1'b1}}) begin
                             cs = 'b1;
                         end
                         phase <= 'b0;
                     end else begin
-                        mosi <= in_buf[bi];
+                        mosi <= ~in_buf[bi];
                         sck <= 'b0;
                         phase <= 'b1;
                     end
                 end
             end else begin
-                bi <= 'b0;
+                bi <= {BIBITS{1'b1}};
                 sck <= 'b1;
                 mosi <= 'b1;
                 if (start) begin

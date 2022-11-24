@@ -31,7 +31,7 @@ module AidanMedcalf_pid_controller (
 
     wire pv_in_clk;
     wire pv_in_cs;
-    reg pv_in_cs_last;
+    reg  [1:0] pv_in_cs_hist;
     wire out_clk, out_cs, out_mosi;
 
     assign io_out[0] = pv_in_clk;
@@ -69,6 +69,9 @@ module AidanMedcalf_pid_controller (
     wire pid_stb;
     reg pid_stb_d1;
 
+    wire pid_rst;
+    assign pid_rst = reset || !cfg_cs;
+
     // I/O registers
     reg [7:0] in_pv;
     reg [7:0] out;
@@ -79,43 +82,32 @@ module AidanMedcalf_pid_controller (
     spi_slave_in #(.BITS(48)) cfg_spi(.reset(reset), .clk(clk), .cs(cfg_cs), .sck(cfg_clk), .mosi(cfg_mosi), .out_buf(cfg_spi_buffer));
 
     // Shift input in
-    spi_master_in spi_in(.reset(reset), .clk(clk),
+    spi_master_in spi_in(.reset(pid_rst), .clk(clk),
                            .miso(pv_in_miso), .start(pv_stb),
                            .out_buf(in_pv), .sck(pv_in_clk), .cs(pv_in_cs));
 
     // Shift output out
-    spi_master_out spi_out(.reset(reset), .clk(clk), .in_buf(out),
+    spi_master_out spi_out(.reset(pid_rst), .clk(clk), .in_buf(out),
                            .start(pid_stb_d1),
                            .sck(out_clk), .cs(out_cs), .mosi(out_mosi));
 
     // PID core
-    pid pid (.reset(reset), .clk(clk), .pv_stb(pid_stb),
+    pid pid (.reset(pid_rst), .clk(clk), .pv_stb(pid_stb),
              .sp(sp), .pv(in_pv),
              .kp(kp), .ki(ki), .kd(kd),
              .stimulus(out));
     
     strobe #(.BITS(16)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
-    assign pid_stb = pv_in_cs && !pv_in_cs_last;
-    //edge_detect pv_in_cs_pe(.reset(reset), .clk(clk), .sig(pv_in_cs), .pol(1'b1), .out(pid_stb));
+    assign pid_stb = pv_in_cs && !pv_in_cs_hist[1];
 
     always @(posedge clk) begin
         if (reset) begin
-            //cfg_buf[0] <= 8'h4A;
-            //cfg_buf[1] <= 8'h23;
-            //cfg_buf[2] <= 8'h00;
-            //cfg_buf[3] <= 8'h10;
             pid_stb_d1 <= 'b0;
-            pv_in_cs_last <= 'b0;
+            pv_in_cs_hist <= 'b0;
         end else begin
-            pv_in_cs_last <= pv_in_cs;
+            pv_in_cs_hist <= { pv_in_cs_hist[0], pv_in_cs };
             pid_stb_d1 <= pid_stb;
-            //if (cfg_spi_done) begin
-                //cfg_buf[3] <= cfg_spi_buffer[7:0];
-                //cfg_buf[2] <= cfg_spi_buffer[15:8];
-                //cfg_buf[1] <= cfg_spi_buffer[23:16];
-                //cfg_buf[0] <= cfg_spi_buffer[31:24];
-            //end
         end
     end
 

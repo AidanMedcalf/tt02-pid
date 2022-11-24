@@ -97,25 +97,9 @@ async def test_gl(dut):
     await spi_master_send(dut.clk, dut.cfg_sck, dut.cfg_mosi, dut.cfg_cs, 0x010000352480, 48, inv=True)
     await ClockCycles(dut.clk, 1)
 
-    #await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x02, 8)
-    #await ClockCycles(dut.clk, 1)
-    #assert await spi_slave_receive(dut.clk, dut.out_clk, dut.out_mosi, dut.out_cs, 8) == 0x2C
     await pid_transact(dut, 0x02, 0x2C)
-
-    # send some more inputs
-    #await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x02, 8)
-    #await ClockCycles(dut.clk, 1)
-    #assert await spi_slave_receive(dut.clk, dut.out_clk, dut.out_mosi, dut.out_cs, 8) == 0xAB
     await pid_transact(dut, 0x02, 0xAB)
-
-    #await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x03, 8)
-    #await ClockCycles(dut.clk, 1)
-    #assert await spi_slave_receive(dut.clk, dut.out_clk, dut.out_mosi, dut.out_cs, 8) == 0xC5
     await pid_transact(dut, 0x03, 0xC5)
-
-    #await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x04, 8)
-    #await ClockCycles(dut.clk, 1)
-    #assert await spi_slave_receive(dut.clk, dut.out_clk, dut.out_mosi, dut.out_cs, 8) == 0x29
     await pid_transact(dut, 0x04, 0x29)
 
     await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x08, 8)

@@ -36,7 +36,7 @@ module pid #(
 
     //assign pacc = error * kp;
 	// kp always positive, so sgn(pacc) = sgn(error)
-	assign pacc = { error[BITS], error[BITS-1:0] * kp };
+	assign pacc = { error[BITS], { {(BITS-1){1'b0}}, error[BITS-1:0] } * { {(BITS-1){1'b0}}, kp } };
 	//Mult_Wallace4 #(.N(BITS)) pmul (.a(error[BITS-1:0]), .b(kp), .o(pacc[2*BITS-1:0]));
 
 	//assign dacc = diff * kd;
@@ -46,18 +46,19 @@ module pid #(
 	//Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
 
 	//assign iacc = error_i * ki;
-	assign iacc = { error_i[BITS], error_i[BITS-1:0] * ki };
+	assign iacc = { error_i[BITS], { {(BITS-1){1'b0}}, error_i[BITS-1:0] } * { {(BITS-1){1'b0}}, ki } };
     //Mult_Wallace4 #(.N(BITS)) imul (.a(error_i[BITS-1:0]), .b(ki), .o(iacc[2*BITS-1:0]));
 	
 	//assign accumulator = pacc - dacc + iacc;
 	assign accumulator = pacc + iacc;
     // sat_add #(.BITS(2*BITS)) apadd (.A({2*BITS{1'b0}}), .B(pacc), .O(accumulator));
-    assign stimulus = (reset || accumulator[2*BITS]) ? {2*BITS{1'b0}} : accumulator[2*BITS-1:BITS];
+    assign stimulus = (reset || accumulator[2*BITS]) ? {BITS{1'b0}} : accumulator[2*BITS-1:BITS];
 
     always @(posedge clk) begin
 		error <= error_calc;
         if (reset) begin
 			//error_p <= error_calc;
+            error <= 'b0;
 			error_i <= 'b0;
         end else begin
 			if (pv_stb) begin
