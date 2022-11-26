@@ -94,7 +94,7 @@ async def test_gl(dut):
 
     # shift in config
     loginfo("Send cfg")
-    await spi_master_send(dut.clk, dut.cfg_sck, dut.cfg_mosi, dut.cfg_cs, 0x010000352480, 48, inv=True)
+    await spi_master_send(dut.clk, dut.cfg_sck, dut.cfg_mosi, dut.cfg_cs, 0x0100352480, 40, inv=True)
     await ClockCycles(dut.clk, 1)
 
     await pid_transact(dut, 0x02, 0x2C)

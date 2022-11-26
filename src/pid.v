@@ -16,7 +16,7 @@ module pid #(
     input  [BITS-1:0] pv,
     input  [BITS-1:0] kp,
     input  [BITS-1:0] ki,
-    input  [BITS-1:0] kd,
+    //input  [BITS-1:0] kd,
     output [BITS-1:0] stimulus
 );
 
