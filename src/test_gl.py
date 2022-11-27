@@ -98,9 +98,9 @@ async def test_gl(dut):
     await ClockCycles(dut.clk, 1)
 
     await pid_transact(dut, 0x02, 0x2C)
-    await pid_transact(dut, 0x02, 0xAB)
-    await pid_transact(dut, 0x03, 0xC5)
-    await pid_transact(dut, 0x04, 0x29)
+    await pid_transact(dut, 0x02, 0x46)
+    await pid_transact(dut, 0x03, 0x00)
+    await pid_transact(dut, 0x04, 0x00)
 
     await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x08, 8)
     await ClockCycles(dut.clk, 1)

@@ -99,7 +99,7 @@ module AidanMedcalf_pid_controller (
     
     strobe #(.BITS(16)) pv_stb_gen(.reset(reset), .clk(clk), .level(stb_level), .out(pv_stb));
 
-    assign pid_stb = pv_in_cs && !pv_in_cs_hist[1];
+    assign pid_stb = pv_in_cs_hist[0] && !pv_in_cs_hist[1];
 
     always @(posedge clk) begin
         if (reset) begin
