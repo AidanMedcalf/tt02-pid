@@ -26,9 +26,9 @@ module pid #(
     reg  signed [BITS:0] error_i;
 	//wire signed [BITS:0] diff;
     
-    wire signed [2*BITS:0] pacc;
+    wire signed [2*BITS-2:0] pacc;
     //wire signed [2*BITS:0] dacc;
-    wire signed [2*BITS:0] iacc;
+    wire signed [2*BITS-2:0] iacc;
     wire signed [2*BITS:0] accumulator;
 
     assign error_calc = {1'b0,sp} - {1'b0,pv};
@@ -36,8 +36,8 @@ module pid #(
 
     //assign pacc = error * kp;
 	// kp always positive, so sgn(pacc) = sgn(error)
-    assign pacc[2*BITS] = error[BITS];
-    assign pacc[2*BITS-1:0] = { {BITS{1'b0}}, error[BITS-1:0] } * { {BITS{1'b0}}, kp };
+    assign pacc[2*BITS-2] = error[BITS];
+    assign pacc[2*BITS-3:0] = { {BITS-2{1'b0}}, error[BITS-1:0] } * { {BITS{1'b0}}, kp[BITS-3:0] };
     //arrmul #(.WIDTH(2*BITS)) pmul (
         //.a({{BITS{1'b0}}, error[BITS-1:0]}),
         //.b({{BITS{1'b0}}, kp}),
@@ -52,8 +52,8 @@ module pid #(
 	//Mult_Wallace4 #(.N(BITS)) dmul (.a(diff[BITS-1:0]), .b(kd), .o(dacc[2*BITS-1:0]));
 
 	//assign iacc = error_i * ki;
-    assign iacc[2*BITS] = error_i[BITS];
-    assign iacc[2*BITS-1:0] = { {BITS{1'b0}}, error_i[BITS-1:0] } * { {BITS{1'b0}}, ki };
+    assign iacc[2*BITS-2] = error_i[BITS];
+    assign iacc[2*BITS-3:0] = { {BITS-2{1'b0}}, error_i[BITS-1:0] } * { {BITS{1'b0}}, ki[BITS-3:0] };
     //arrmul #(.WIDTH(2*BITS)) imul (
         //.a({{BITS{1'b0}}, error_i[BITS-1:0]}),
         //.b({{BITS{1'b0}}, ki}),
