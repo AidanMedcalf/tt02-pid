@@ -19,20 +19,9 @@ module spi_slave_in #(
 	output [BITS-1:0] out_buf
 );
 
-// TODO: transaction reset timer
-
-	localparam BCBITS = $clog2(BITS);
-	reg [BCBITS-1:0] bi; // bit index
-	
-	wire [BCBITS-1:0] bi_next;
-	assign bi_next = bi + 'b1;
-
     reg [BITS-1:0] buffer;
     assign out_buf = buffer;
 
-    reg busy;
-    //reg last_busy;
-    //assign done = !busy && last_busy;
 	wire bit_out;
     assign bit_out = reset ? 1'b0 : !mosi;
 
@@ -43,17 +32,11 @@ module spi_slave_in #(
             buffer <= 'b0;
         end
 		if (reset || cs) begin
-            //last_busy <= 'b0;
-			busy <= 'b0;
-			bi <= 'b0;
             sck_last <= 'b0;
         end else begin
-            //last_busy <= busy;
             sck_last <= sck;
             if (!sck && sck_last) begin // falling edge of SCK
                 buffer <= { buffer[BITS-2:0], bit_out };
-                bi <= bi_next;
-                busy <= !busy || bi_next != 'b0;
             end
         end
     end

@@ -31,10 +31,7 @@ module spi_master_out #(
     
     reg phase;
 
-    wire stb_reset;
-    assign stb_reset = reset || cs;
     reg [2:0] stb;
-    //strobe #(.BITS(2)) stb (.reset(stb_reset), .clk(clk), .level(2'd2), .out(sck_stb));
 
     always @(posedge clk) begin
         if (reset) begin

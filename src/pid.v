@@ -37,10 +37,11 @@ module pid #(
     //assign pacc = error * kp;
 	// kp always positive, so sgn(pacc) = sgn(error)
     assign pacc[2*BITS] = error[BITS];
-    arrmul #(.WIDTH(2*BITS)) pmul (
-        .a({{BITS{1'b0}}, error[BITS-1:0]}),
-        .b({{BITS{1'b0}}, kp}),
-        .y(pacc[2*BITS-1:0]));
+    assign pacc[2*BITS-1:0] = { {BITS{1'b0}}, error[BITS-1:0] } * { {BITS{1'b0}}, kp };
+    //arrmul #(.WIDTH(2*BITS)) pmul (
+        //.a({{BITS{1'b0}}, error[BITS-1:0]}),
+        //.b({{BITS{1'b0}}, kp}),
+        //.y(pacc[2*BITS-1:0]));
 	//assign pacc = { error[BITS], { {(BITS-1){1'b0}}, error[BITS-1:0] } * { {(BITS-1){1'b0}}, kp } };
 	//Mult_Wallace4 #(.N(BITS)) pmul (.a(error[BITS-1:0]), .b(kp), .o(pacc[2*BITS-1:0]));
 
@@ -52,10 +53,11 @@ module pid #(
 
 	//assign iacc = error_i * ki;
     assign iacc[2*BITS] = error_i[BITS];
-    arrmul #(.WIDTH(2*BITS)) imul (
-        .a({{BITS{1'b0}}, error_i[BITS-1:0]}),
-        .b({{BITS{1'b0}}, ki}),
-        .y(iacc[2*BITS-1:0]));
+    assign iacc[2*BITS-1:0] = { {BITS{1'b0}}, error_i[BITS-1:0] } * { {BITS{1'b0}}, ki };
+    //arrmul #(.WIDTH(2*BITS)) imul (
+        //.a({{BITS{1'b0}}, error_i[BITS-1:0]}),
+        //.b({{BITS{1'b0}}, ki}),
+        //.y(iacc[2*BITS-1:0]));
 	//assign iacc = { error_i[BITS], { {(BITS-1){1'b0}}, error_i[BITS-1:0] } * { {(BITS-1){1'b0}}, ki } };
     //Mult_Wallace4 #(.N(BITS)) imul (.a(error_i[BITS-1:0]), .b(ki), .o(iacc[2*BITS-1:0]));
 	
