@@ -71,6 +71,7 @@ async def pid_transact(dut, sendval, recval):
     loginfo(f"Send {sendval:X} expect {recval:X}")
     await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, sendval, 8)
     await ClockCycles(dut.clk, 1)
+    #await spi_slave_receive(dut.clk, dut.out_clk, dut.out_mosi, dut.out_cs, 8)
     assert await spi_slave_receive(dut.clk, dut.out_clk, dut.out_mosi, dut.out_cs, 8) == recval
 
 @cocotb.test()
@@ -94,18 +95,16 @@ async def test_gl(dut):
 
     # shift in config
     loginfo("Send cfg")
-    await spi_master_send(dut.clk, dut.cfg_sck, dut.cfg_mosi, dut.cfg_cs, 0x0100352480, 40, inv=True)
+    await spi_master_send(dut.clk, dut.cfg_sck, dut.cfg_mosi, dut.cfg_cs, 0x352480, 24, inv=True)
     await ClockCycles(dut.clk, 1)
 
     await pid_transact(dut, 0x02, 0x2C)
     await pid_transact(dut, 0x02, 0x46)
     await pid_transact(dut, 0x03, 0x00)
-    await pid_transact(dut, 0x04, 0x04)
+    await pid_transact(dut, 0x04, 0x00)
+    await pid_transact(dut, 0x08, 0x04)
+    await pid_transact(dut, 0x10, 0x26)
 
-    await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x08, 8)
-    await ClockCycles(dut.clk, 1)
-    await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x10, 8)
-    await ClockCycles(dut.clk, 1)
     await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x20, 8)
     await ClockCycles(dut.clk, 1)
     await spi_slave_send(dut.clk, dut.pv_in_clk, dut.pv_in_miso, dut.pv_in_cs, 0x40, 8)
