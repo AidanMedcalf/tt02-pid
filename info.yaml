@@ -23,7 +23,7 @@ documentation:
   title:        "TinyPID"      # Project title
   description:  "Tiny PID controller with SPI configuration channel, SPI ADC and DAC driver"      # Short description of what your project does
   how_it_works: "TinyPID reads from a shift register, calculates error and PID values, and writes to a shift register. All parameters of this process are configurable."      # Longer description of how the project works
-  how_to_test:  "Shift in config, then shift in PV input and see what happens. There are three bytes of configuration (setpoint, kp, ki), which are zero on startup".      # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
+  how_to_test:  "Shift in config, then shift in PV input and see what happens. There are three bytes of configuration (setpoint, kp, ki), which are zero on startup."      # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
   external_hw:  "One shift register / ADC for PV read, one shift register / DAC for stimulus output."       # Describe any external hardware needed
   language:     "Verilog" # other examples include Verilog, Amaranth, VHDL, etc
   doc_link:     "https://github.com/AidanMedcalf/tt02-pid/blob/main/README.md"      # URL to longer form documentation, eg the README.md in your repository
